@@ -64,12 +64,12 @@ public class RxFragment extends Fragment {
         return view;
     }
 
-    /*@Override
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
-        if (compositeDisposable!=null && !compositeDisposable.isDisposed()){
+        /*if (compositeDisposable!=null && !compositeDisposable.isDisposed()){
             compositeDisposable.dispose();
-        }
-    }*/
+        }*/
+    }
 }

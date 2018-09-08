@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -53,13 +54,6 @@ public class RxBus {
     }
 
     /**
-     * 根据传递的 eventType 类型返回特定类型(eventType)的 被观察者
-     */
-    public <T> Observable<T> toObservable(final Class<T> eventType) {
-        return mBus.ofType(eventType);
-    }
-
-    /**
      * 使用Rxlifecycle解决RxJava引起的内存泄漏
      */
     public <T> Observable<T> toObservable(LifecycleOwner owner, final Class<T> eventType) {
@@ -95,10 +89,12 @@ public class RxBus {
 
     /**
      * 根据传递的 eventType 类型返回特定类型(eventType)的 被观察者
+     * 使用Rxlifecycle解决RxJava引起的内存泄漏
      */
-    public <T> Observable<T> toObservableSticky(final Class<T> eventType) {
+    public <T> Observable<T> toObservableSticky(LifecycleOwner owner,final Class<T> eventType) {
         synchronized (mStickyEventMap) {
-            Observable<T> observable = mBus.ofType(eventType);
+            LifecycleProvider<Lifecycle.Event> provider = AndroidLifecycle.createLifecycleProvider(owner);
+            Observable<T> observable = mBus.ofType(eventType).compose(provider.<T>bindToLifecycle());
             final Object event = mStickyEventMap.get(eventType);
 
             if (event != null) {
